@@ -4,7 +4,7 @@ module LoopVectorizationTools
 	using LoopVectorization
 	using Base.Cartesian
 
-	export decomplexify, recomplexify, turbo_block_copyto!
+	export decomplexify, recomplexify, turbo_block_copyto!, turbo_wipe!
 
 
 	# Working with complex arrays
@@ -70,6 +70,18 @@ module LoopVectorizationTools
 	#	end
 	#	return dest
 	#end
+
+	function turbo_wipe!(a::AbstractArray{T, N}) where {T <: Real, N}
+		@tturbo for i = 1:length(a)
+			a[i] = 0
+		end
+		return a
+	end
+	function turbo_wipe!(a::AbstractArray{T, N}) where {T <: Complex, N}
+		ad = decomplexify(a)
+		turbo_wipe!(ad)
+		return a
+	end
 
 end
 
