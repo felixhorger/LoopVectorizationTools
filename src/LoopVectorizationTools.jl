@@ -4,7 +4,7 @@ module LoopVectorizationTools
 	using LoopVectorization
 	using Base.Cartesian
 
-	export decomplexify, recomplexify, turbo_block_copyto!, turbo_wipe!
+	export decomplexify, recomplexify, turbo_block_copyto!, turbo_wipe!, turbo_multiply!
 
 
 	# Working with complex arrays
@@ -81,6 +81,19 @@ module LoopVectorizationTools
 		ad = decomplexify(a)
 		turbo_wipe!(ad)
 		return a
+	end
+
+	@generated function turbo_multiply!(
+		x::AbstractArray{<: Real},
+		y::Real;
+		num_threads::Val{NT}=Val(Threads.nthreads())
+	) where NT
+		quote
+			@tturbo thread=$NT for i in 1:length(x)
+				x[i] *= y
+			end
+			return x
+		end
 	end
 
 end
